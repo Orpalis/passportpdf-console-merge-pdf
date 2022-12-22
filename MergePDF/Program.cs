@@ -26,15 +26,20 @@ namespace PdfMerger
             string uri1 = "https://passportpdfapi.com/test/invoice_with_barcode.pdf";
             string uri2 = "https://passportpdfapi.com/test/multiple_pages.pdf";
 
+            List<string> uriList = new List<string> {uri1, uri2};
+
             DocumentApi docApi = new();
 
             Console.WriteLine("Loading documents into PassportPDF...");
 
-            DocumentLoadResponse document1 = await docApi.DocumentLoadFromURIAsync(new LoadDocumentFromURIParameters(uri1));
-            DocumentLoadResponse document2 = await docApi.DocumentLoadFromURIAsync(new LoadDocumentFromURIParameters(uri2));
+            List<string> listOfFilesIds = new List<string>();
 
-            string uri1Id = document1.FileId;
-            string uri2Id = document2.FileId;
+            foreach (string uri in uriList)
+            {
+                DocumentLoadResponse document = await docApi.DocumentLoadFromURIAsync(new LoadDocumentFromURIParameters(uri));
+                string uriId = document.FileId;
+                listOfFilesIds.Add(uriId);
+            }
 
             Console.WriteLine("Documents loaded.");
 
@@ -42,7 +47,6 @@ namespace PdfMerger
             
             PDFApi pdfApi = new();
 
-            List<string> listOfFilesIds = new List<string> { uri1Id, uri2Id };
             PdfMergeResponse pdfMergeResponse = await pdfApi.MergeAsync(new PdfMergeParameters(listOfFilesIds));
 
             if (pdfMergeResponse.Error is not null)
